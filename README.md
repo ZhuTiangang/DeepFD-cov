@@ -44,7 +44,7 @@ The above example computes the coverage of each generated mutant and original mo
 ```shell
 python CodeBook/Utils/cal_stats_1.py -pd=Evaluation -ds=MNIST -iter=5 -ov 1 -stat=1
 ```
-The above example extracts metrics from each case under `Evaluation/MNIST`, which outputs to `Evaluation/MNISTsummary.csv`.
+The above example extracts metrics from each case under `Evaluation/MNIST`, which outputs to `Evaluation/MNIST/summary.csv`.
 
 ### Step5 Fault Diagnosis Model Construction
 ```shell
