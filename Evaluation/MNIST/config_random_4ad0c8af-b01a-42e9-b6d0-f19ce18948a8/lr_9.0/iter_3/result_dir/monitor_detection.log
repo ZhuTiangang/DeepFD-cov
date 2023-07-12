@@ -1,0 +1,13 @@
+checktype,current_epoch,issue_list,time_usage,Describe
+batch,0,[],1.0322051048278809,No Issue now
+batch,0,[],2.09037709236145,No Issue now
+batch,0,[],3.0767414569854736,No Issue now
+batch,0,[],4.137904167175293,No Issue now
+batch,0,[],5.164161682128906,No Issue now
+batch,0,[],6.164487838745117,No Issue now
+batch,0,[],7.221663475036621,No Issue now
+batch,0,[],8.298785209655762,No Issue now
+batch,0,[],9.319058179855347,No Issue now
+batch,0,[],10.337335109710693,No Issue now
+batch,0,['explode'],11.484270572662354,Found Issue Stop Training! Starting the repair procedure.
+batch,0,['explode'],12.583332061767578,Found Issue Stop Training! Starting the repair procedure.

@@ -1,0 +1,5 @@
+checktype,current_epoch,issue_list,time_usage,Describe
+batch,0,[],1.065152883529663,No Issue now
+batch,0,[],2.257964849472046,No Issue now
+batch,0,['explode'],3.3600196838378906,Found Issue Stop Training! Starting the repair procedure.
+batch,0,['explode'],4.389268636703491,Found Issue Stop Training! Starting the repair procedure.

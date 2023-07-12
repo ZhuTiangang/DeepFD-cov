@@ -16,10 +16,21 @@ pip install -r requirements.txt
 ## Quick start
 
 ### Data Source
-- We use the dataset and models from paper: AUTOTRAINER: An Automatic DNN Training
+- We use the original datasets and models from paper: AUTOTRAINER: An Automatic DNN Training
 Problem Detection and Repair System. Please download from [here](https://github.com/shiningrain/AUTOTRAINER).
 - Download into folder `Evaluation`, sub-folders inside including `MNIST`, `CIFAR-10`, etc.
 
+### Sample of fault diagnosis
+There are two original models with their generated mutants under `Evaluation/MNIST`.
+Run
+```shell
+python CodeBook/predict.py
+```
+to use our pretrained models for fault diagnosis. 
+You will see the predicted results of both fault diagnosis models with and without coverage metrics.
+
+##Workflow
+Build fault diagnosis models for DNN models on your own.
 ### Step1 Fault Seeding
 ```shell
 python CodeBook/seed_all.py --base Evaluation --dataset MNIST -sf 1 --fault_type loss

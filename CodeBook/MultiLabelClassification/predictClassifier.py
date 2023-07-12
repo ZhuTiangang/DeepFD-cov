@@ -94,12 +94,14 @@ if __name__ == '__main__':
     program_dir = args.program_dir
     dataset_dir = args.dataset
     file = args.filename
-    if "all" in args.model_dir:
-        # use all the pretrained model to diagnose
-        model_dir = os.listdir("./Classifiers/")
-        model_dir = ["./Classifiers/" + path for path in model_dir]
-    else:
-        model_dir = [args.model_dir]
+    clf_list_dir = args.model_dir + "/" + args.dataset
+    model_dir = os.listdir(clf_list_dir)
+    # if "all" in args.model_dir:
+    #     # use all the pretrained model to diagnose
+    #     model_dir = os.listdir("./Classifiers/" + dataset_dir)
+    #     model_dir = ["./Classifiers/" + path for path in model_dir]
+    # else:
+    #     model_dir = [args.model_dir]
     overwrite = args.overwrite
     iteraction = max(0, args.iteration)
     upper_impact = args.impact
@@ -153,7 +155,8 @@ if __name__ == '__main__':
     X = X.astype(np.float32)
     X = X.replace([np.inf, -np.inf], np.nan)
     X = X.fillna(0.0)
-    print(X)
+    #print(df[:5]["ft_val_loss"])
+    #print(X[:5])
 
     # print info
     print("\nLabel Stats: {} ({})".format(len(labels), ", ".join(labels)))
@@ -173,48 +176,81 @@ if __name__ == '__main__':
     # print("the total label count is: ")
     # print(np.sum(Y, axis=0))
 
-    modelPredictList = []
-    for model in model_dir:
-        predictList = []
-        for cls_name in names:
-            start_time = time.time()
-
-            classifier_dir = os.path.join(model, dataset_dir)
-            os.makedirs(classifier_dir, exist_ok=True)
-
-            pkl_path = os.path.join(classifier_dir, "{}.pkl".format(cls_name))
-            clf = load(pkl_path)
-
-            predictList.append(predict(clf, X))
-
-        N = Y.shape[0]
-        total_acc, total_prec, total_rec, total_fsc = 0, 0, 0, 0
-        predictList = np.array(predictList)
-        modelPredictList.append(predictList)
-
-        for i in range(iter_num, N, iter_num):
-            predict = predictList[:, i:i + iter_num, :]  # shape of predict: [n_classifier, iter, 5]
-            predict_sum = np.sum(predict, axis=1)  # shape of predict_sum: [n_classifier, 5]
-            print("{}\nWorking on case: ".format("=" * 20, (i / 9)))
+    for i in range(0, Y.shape[0], 5):
+        if df["Unnamed: 0"][i] in os.listdir(base_dir):
             print("working on subject: ", df["Unnamed: 0"][i])
-
-            # WARNING, this line is added to alleviate the training bias problem in the prediction stage
-            # Theoretically, this line should be `predict_sum_shift = predict_sum`
-            predict_sum_shift = predict_sum - np.array([0, 2, 3, 6, 5])
-            predict_sum_shift[predict_sum_shift <= 0] = 0
-            predict_sum_shift[predict_sum_shift > 0] = 1
-
-            pred_voting = cal_metrics_voting(predict_sum_shift)  # shape of pred: [n_classifier, 5]
-            # if precision != 0:
-            # print(predict_sum)
+            # print(df["Unnamed: 1"][i:i+5])
             label_name = ['optimizer', 'lr', 'act', 'loss', 'epoch']
-
             gt_label = np.where(Y[i] == 1)[0]
             gt_list = []
             for label_index in gt_label:
                 gt_list.append(label_name[label_index])
             print("The ground truth faults: {}".format(gt_list))
 
-            # print("the label is: {}, the predicted label is: {}.".format(Y[i], pred_voting))
-            lineLoc(program_dir, dataset_dir, pred_voting, label_name, df["Unnamed: 0"][i])
-            print("case end \n{}\n".format("=" * 20))
+            for model in model_dir:
+                if not model.endswith("pkl"):
+                    continue
+                # predictList = []
+                # for cls_name in names:
+                #     start_time = time.time()
+                #
+                #     classifier_dir = os.path.join(model, dataset_dir)
+                #     os.makedirs(classifier_dir, exist_ok=True)
+                #
+                #     pkl_path = os.path.join(classifier_dir, "{}.pkl".format(cls_name))
+                #     clf = load(pkl_path)
+                #
+                #     predictList.append(predict(clf, X))
+                #
+                # N = Y.shape[0]
+                # total_acc, total_prec, total_rec, total_fsc = 0, 0, 0, 0
+                # predictList = np.array(predictList)
+                # modelPredictList.append(predictList)
+                # print(X.shape)
+                # print(X.iloc[:,:148].shape)
+                clf_dir = os.path.join(clf_list_dir, model)
+                clf = load(clf_dir)
+                if model.endswith("origin.pkl"):
+                    predict_list = predict(clf, X.iloc[i:i+5,:148])
+                    #print(Y)
+                else:
+                    predict_list = predict(clf, X[i:i+5])
+                # predict_list = predict_list[i:i+5, :]
+
+                # print(predict_list)
+                predict_sum = np.sum(predict_list, axis=0)
+                predict_sum[predict_sum <= 1] = 0
+                predict_sum[predict_sum > 1] = 1
+                # print(predict_list)
+                pre_label = np.where(predict_sum==1)[0]
+                pre_list = []
+                for label_index in pre_label:
+                    pre_list.append(label_name[label_index])
+                print("Classifier: {}\tThe predicted faults: {}".format(model, pre_list))
+
+        # for i in range(iter_num, N, iter_num):
+        #     predict = predictList[:, i:i + iter_num, :]  # shape of predict: [n_classifier, iter, 5]
+        #     predict_sum = np.sum(predict, axis=1)  # shape of predict_sum: [n_classifier, 5]
+        #     print("{}\nWorking on case: ".format("=" * 20, (i / 9)))
+        #     print("working on subject: ", df["Unnamed: 0"][i])
+        #
+        #     # WARNING, this line is added to alleviate the training bias problem in the prediction stage
+        #     # Theoretically, this line should be `predict_sum_shift = predict_sum`
+        #     predict_sum_shift = predict_sum - np.array([0, 2, 3, 6, 5])
+        #     predict_sum_shift[predict_sum_shift <= 0] = 0
+        #     predict_sum_shift[predict_sum_shift > 0] = 1
+        #
+        #     pred_voting = cal_metrics_voting(predict_sum_shift)  # shape of pred: [n_classifier, 5]
+        #     # if precision != 0:
+        #     # print(predict_sum)
+        #     label_name = ['optimizer', 'lr', 'act', 'loss', 'epoch']
+        #
+        #     gt_label = np.where(Y[i] == 1)[0]
+        #     gt_list = []
+        #     for label_index in gt_label:
+        #         gt_list.append(label_name[label_index])
+        #     print("The ground truth faults: {}".format(gt_list))
+        #
+        #     # print("the label is: {}, the predicted label is: {}.".format(Y[i], pred_voting))
+        #     lineLoc(program_dir, dataset_dir, pred_voting, label_name, df["Unnamed: 0"][i])
+        #     print("case end \n{}\n".format("=" * 20))
