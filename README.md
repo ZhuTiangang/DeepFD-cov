@@ -29,8 +29,9 @@ python CodeBook/predict.py
 to use our pretrained models for fault diagnosis. 
 You will see the predicted results of both fault diagnosis models with and without coverage metrics.
 
-##Workflow
+## Workflow
 Build fault diagnosis models for DNN models on your own.
+
 ### Step1 Fault Seeding
 ```shell
 python CodeBook/seed_all.py --base Evaluation --dataset MNIST -sf 1 --fault_type loss
